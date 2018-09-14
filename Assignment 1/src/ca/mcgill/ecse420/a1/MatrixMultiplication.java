@@ -93,9 +93,8 @@ public class MatrixMultiplication {
         	for(MultiplyTask task : tasks) {
         		executor.execute(task);
         	}
-        	
+
         	latch.await();
-        	
         	return result;
 		
 	}
@@ -141,5 +140,4 @@ public class MatrixMultiplication {
         		latch.countDown();
 			}
         }
-	
 }
