@@ -13,8 +13,8 @@ import java.util.concurrent.ForkJoinTask;
 
 public class MatrixMultiplication {
 	
-	private static final int NUMBER_THREADS = 1;
-	private static final int MATRIX_SIZE = 2000;
+	private static final int NUMBER_THREADS = 100;
+	private static final int MATRIX_SIZE = 1000;
 	private static final int portion = MATRIX_SIZE / NUMBER_THREADS;
 	private static double[][] a;
 	private static double[][] b;
@@ -29,7 +29,6 @@ public class MatrixMultiplication {
 		try {
 			timeMultiplication();
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		//sequentialMultiplyMatrix(a, b);
