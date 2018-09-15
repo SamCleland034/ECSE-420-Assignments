@@ -3,25 +3,25 @@ package ca.mcgill.ecse420.a1;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class DiningPhilosophers {
 
-	private static Lock[] chopsticks;
+	private static ReentrantLock[] chopsticks;
 	private static int numberOfPhilosophers = 5;
 	private static final Logger logger = Logger.getLogger(DiningPhilosophers.class.getName());
 
 	public static void main(String[] args) {
 
 		Philosopher[] philosophers = new Philosopher[numberOfPhilosophers];
-		chopsticks = new Lock[numberOfPhilosophers];
+		chopsticks = new ReentrantLock[numberOfPhilosophers];
 		ExecutorService executor = Executors.newFixedThreadPool(numberOfPhilosophers);
 
 		for (int i = 0; i < numberOfPhilosophers; i++) {
-			chopsticks[i] = new ReentrantLock();
+			chopsticks[i] = new ReentrantLock(true);
 		}
 
 		for (int i = 0; i < numberOfPhilosophers; i++) {
@@ -41,31 +41,44 @@ public class DiningPhilosophers {
 
 		public Philosopher(int number) {
 			this.philosopherName = "Philosopher " + number;
-			this.leftChopstick = (ReentrantLock) chopsticks[number - 1 < 0 ? numberOfPhilosophers - 1 : number - 1];
-			this.rightChopstick = (ReentrantLock) chopsticks[number];
+			this.leftChopstick = chopsticks[number - 1 < 0 ? numberOfPhilosophers - 1 : number - 1];
+			this.rightChopstick = chopsticks[number];
 		}
 
 		@Override
 		public void run() {
+			Condition left = leftChopstick.newCondition();
+			Condition right = rightChopstick.newCondition();
 			while (true) {
 				try {
-					System.out.println(philosopherName + " is thinking...");
 					leftChopstick.lock();
-					if (rightChopstick.tryLock(1, TimeUnit.SECONDS)) {
-						System.out.println(philosopherName + " is eating...");
-						sleepFor(3000);
-					} else {
-						System.out.println(philosopherName + " couldn't acquire both forks...releasing....");
+					if (!rightChopstick.tryLock(1, TimeUnit.SECONDS)) {
+						if (!left.await(1, TimeUnit.SECONDS)) {
+							continue;
+						}
 					}
+
+					if (!leftChopstick.isHeldByCurrentThread()) {
+						leftChopstick.lock();
+					}
+
+					System.out.println(philosopherName + " is eating...");
+					sleepFor(3000);
 				} catch (InterruptedException ix) {
 					logger.log(Level.SEVERE, ix.getMessage());
 				} finally {
-					leftChopstick.unlock();
 					if (rightChopstick.isHeldByCurrentThread()) {
+						right.signalAll();
 						rightChopstick.unlock();
 					}
 
-					sleepFor(2000);
+					if (leftChopstick.isHeldByCurrentThread()) {
+						left.signalAll();
+						leftChopstick.unlock();
+					}
+
+					Thread.yield();
+					sleepFor(1000);
 				}
 			}
 		}
