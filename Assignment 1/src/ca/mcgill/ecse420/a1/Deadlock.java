@@ -61,8 +61,19 @@ public class Deadlock {
 		new Thread("Signal") {
 			@Override
 			public void run() {
-				while (doneSignal.getCount() > 0) {
-					System.out.println("Current Count: " + (int) (20 - doneSignal.getCount()));
+				int count = 0;
+				long prevCount = doneSignal.getCount();
+				sleepFor(2000);
+				long currentCount = 0;
+				while (true) {
+					currentCount = doneSignal.getCount();
+					if (count > 5) {
+						System.out.print("Deadlock has occurred...");
+						System.exit(0);
+					} else if (prevCount == currentCount) {
+						count++;
+					}
+					prevCount = currentCount;
 					sleepFor(2000);
 				}
 			}

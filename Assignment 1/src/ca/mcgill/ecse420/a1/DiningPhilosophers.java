@@ -58,10 +58,6 @@ public class DiningPhilosophers {
 						}
 					}
 
-					if (!leftChopstick.isHeldByCurrentThread()) {
-						leftChopstick.lock();
-					}
-
 					System.out.println(philosopherName + " is eating...");
 					sleepFor(3000);
 				} catch (InterruptedException ix) {
