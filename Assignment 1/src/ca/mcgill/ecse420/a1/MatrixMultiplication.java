@@ -8,8 +8,8 @@ import java.util.concurrent.Executors;
 
 public class MatrixMultiplication {
 
-	private static final int NUMBER_THREADS = 2;
-	private static final int MATRIX_SIZE = 1000;
+	private static final int NUMBER_THREADS = 10;
+	private static final int MATRIX_SIZE = 2000;
 	private static final int portion = MATRIX_SIZE / NUMBER_THREADS;
 	private static double[][] a;
 	private static double[][] b;

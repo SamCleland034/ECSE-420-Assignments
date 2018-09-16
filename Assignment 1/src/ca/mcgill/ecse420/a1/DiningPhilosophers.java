@@ -52,10 +52,8 @@ public class DiningPhilosophers {
 			while (true) {
 				try {
 					leftChopstick.lock();
-					if (!rightChopstick.tryLock(1, TimeUnit.SECONDS)) {
-						if (!left.await(1, TimeUnit.SECONDS)) {
-							continue;
-						}
+					if (!rightChopstick.tryLock(0, TimeUnit.SECONDS)) {
+						continue;
 					}
 
 					System.out.println(philosopherName + " is eating...");
