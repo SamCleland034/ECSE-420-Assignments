@@ -71,7 +71,6 @@ public class DiningPhilosophers {
 						leftChopstick.unlock();
 					}
 
-					Thread.yield();
 					sleepFor(1000);
 				}
 			}
