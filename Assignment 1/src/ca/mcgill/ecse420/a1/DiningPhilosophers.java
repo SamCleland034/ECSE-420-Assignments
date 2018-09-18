@@ -10,18 +10,18 @@ import java.util.logging.Logger;
 
 public class DiningPhilosophers {
 
-	private static ReentrantLock[] chopsticks;
+	private static ChopStick[] chopsticks;
 	private static int numberOfPhilosophers = 5;
 	private static final Logger logger = Logger.getLogger(DiningPhilosophers.class.getName());
 
 	public static void main(String[] args) {
 
 		Philosopher[] philosophers = new Philosopher[numberOfPhilosophers];
-		chopsticks = new ReentrantLock[numberOfPhilosophers];
+		chopsticks = new ChopStick[numberOfPhilosophers];
 		ExecutorService executor = Executors.newFixedThreadPool(numberOfPhilosophers);
 
 		for (int i = 0; i < numberOfPhilosophers; i++) {
-			chopsticks[i] = new ReentrantLock(true);
+			chopsticks[i] = new ChopStick(true);
 		}
 
 		for (int i = 0; i < numberOfPhilosophers; i++) {
@@ -33,10 +33,41 @@ public class DiningPhilosophers {
 		}
 	}
 
+	public static class ChopStick extends ReentrantLock {
+
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+
+		public ChopStick(boolean fairness) {
+			super(fairness);
+		}
+
+		private boolean free = true;
+
+		private Condition condition = this.newCondition();
+
+		public Condition getCondition() {
+			return condition;
+		}
+
+		public boolean isFree() {
+			return free;
+		}
+
+		public void setFree(boolean free) {
+			this.free = free;
+			if (free) {
+				condition.signalAll();
+			}
+		}
+	}
+
 	public static class Philosopher implements Runnable {
 
-		private ReentrantLock leftChopstick;
-		private ReentrantLock rightChopstick;
+		private ChopStick leftChopstick;
+		private ChopStick rightChopstick;
 		private String philosopherName;
 
 		public Philosopher(int number) {
@@ -47,11 +78,15 @@ public class DiningPhilosophers {
 
 		@Override
 		public void run() {
-			Condition left = leftChopstick.newCondition();
-			Condition right = rightChopstick.newCondition();
+			Condition left = leftChopstick.getCondition();
+
 			while (true) {
 				try {
 					leftChopstick.lock();
+					while (!rightChopstick.isFree()) {
+						left.await();
+					}
+
 					if (!rightChopstick.tryLock(0, TimeUnit.SECONDS)) {
 						continue;
 					}
@@ -62,12 +97,12 @@ public class DiningPhilosophers {
 					logger.log(Level.SEVERE, ix.getMessage());
 				} finally {
 					if (rightChopstick.isHeldByCurrentThread()) {
-						right.signalAll();
+						rightChopstick.setFree(true);
 						rightChopstick.unlock();
 					}
 
 					if (leftChopstick.isHeldByCurrentThread()) {
-						left.signalAll();
+						leftChopstick.setFree(true);
 						leftChopstick.unlock();
 					}
 

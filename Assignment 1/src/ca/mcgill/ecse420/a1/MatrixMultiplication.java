@@ -1,19 +1,20 @@
 package ca.mcgill.ecse420.a1;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class MatrixMultiplication {
 
-	private static final int NUMBER_THREADS = 10;
-	private static final int MATRIX_SIZE = 2000;
+	private static final int NUMBER_THREADS = 2;
+	private static final int MATRIX_SIZE = 500;
 	private static final int portion = MATRIX_SIZE / NUMBER_THREADS;
 	private static double[][] a;
 	private static double[][] b;
 	private static double[][] result;
+	private static Logger logger = Logger.getLogger(MatrixMultiplication.class.getName());
 
 	public static void main(String[] args) {
 
@@ -23,21 +24,25 @@ public class MatrixMultiplication {
 		result = new double[MATRIX_SIZE][MATRIX_SIZE];
 		try {
 			timeMultiplication();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
+		} catch (InterruptedException ix) {
+			logger.log(Level.SEVERE, ix.getMessage());
 		}
 
 		System.exit(0);
-		// sequentialMultiplyMatrix(a, b);
-		// parallelMultiplyMatrix(a, b);
 	}
 
 	private static void timeMultiplication() throws InterruptedException {
+		System.out.println("Starting sequential matrix multiplication...");
 		long current = System.currentTimeMillis();
-		// sequentialMultiplyMatrix(a, b);
-		parallelMultiplyMatrix(a, b);
+		sequentialMultiplyMatrix(a, b);
 		long difference = System.currentTimeMillis() - current;
-		System.out.println("Time: " + difference + " ms");
+		System.out.println("Sequential time: " + difference + " ms");
+		System.out.println("Starting parallel matrix multiplication with " + NUMBER_THREADS + " threads...");
+		current = System.currentTimeMillis();
+		parallelMultiplyMatrix(a, b);
+		long secondDifference = System.currentTimeMillis() - current;
+		System.out.println("Parallel time: " + secondDifference + " ms");
+		System.out.println("Speedup = " + (float) difference / secondDifference);
 	}
 
 	/**
@@ -82,16 +87,16 @@ public class MatrixMultiplication {
 	 */
 	public static double[][] parallelMultiplyMatrix(double[][] a, double[][] b) throws InterruptedException {
 		ExecutorService executor = Executors.newFixedThreadPool(NUMBER_THREADS);
-		List<MultiplyTask> tasks = new ArrayList<MultiplyTask>();
+
+		// latch to cause main thread to wait for other threads to finish
 		CountDownLatch latch = new CountDownLatch(NUMBER_THREADS);
 		for (int i = 0; i < NUMBER_THREADS; i++) {
-			tasks.add(new MultiplyTask(i, latch));
+
+			// execute a new multiply task
+			executor.execute(new MultiplyTask(i, latch));
 		}
 
-		for (MultiplyTask task : tasks) {
-			executor.execute(task);
-		}
-
+		// pause execution here until threads countdown the latch
 		latch.await();
 		return result;
 
@@ -112,6 +117,7 @@ public class MatrixMultiplication {
 				matrix[row][col] = ((int) (Math.random() * 10.0));
 			}
 		}
+
 		return matrix;
 	}
 
@@ -121,6 +127,7 @@ public class MatrixMultiplication {
 		private CountDownLatch latch;
 
 		public MultiplyTask(int index, CountDownLatch latch) {
+			// threads only take a portion of the work
 			this.index = index * portion;
 			this.latch = latch;
 		}
@@ -130,6 +137,7 @@ public class MatrixMultiplication {
 			int aRows = a.length;
 			int bColumns = b[0].length;
 
+			// only take portion of the rows based on the thread's index
 			for (int i = index; i < index + portion; i++) {
 				for (int j = 0; j < aRows; j++) {
 					for (int k = 0; k < bColumns; k++) {
