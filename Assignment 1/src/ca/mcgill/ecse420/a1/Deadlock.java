@@ -67,12 +67,15 @@ public class Deadlock {
 				long currentCount = 0;
 				while (true) {
 					currentCount = doneSignal.getCount();
-					if (count > 5) {
-						System.out.print("Deadlock has occurred...");
-						System.exit(0);
-					} else if (prevCount == currentCount) {
+					if (prevCount == currentCount) {
 						count++;
 					}
+
+					if (count > 2) {
+						System.out.print("Deadlock has occurred...");
+						System.exit(0);
+					}
+
 					prevCount = currentCount;
 					sleepFor(2000);
 				}
