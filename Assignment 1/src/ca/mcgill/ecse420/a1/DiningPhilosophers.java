@@ -2,7 +2,6 @@ package ca.mcgill.ecse420.a1;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
@@ -31,6 +30,8 @@ public class DiningPhilosophers {
 		for (Philosopher philosopher : philosophers) {
 			executor.execute(philosopher);
 		}
+
+		executor.shutdown();
 	}
 
 	public static class ChopStick extends ReentrantLock {
@@ -87,9 +88,8 @@ public class DiningPhilosophers {
 						left.await();
 					}
 
-					if (!rightChopstick.tryLock(0, TimeUnit.SECONDS)) {
-						continue;
-					}
+					rightChopstick.lock();
+					rightChopstick.setFree(false);
 
 					System.out.println(philosopherName + " is eating...");
 					sleepFor(3000);
