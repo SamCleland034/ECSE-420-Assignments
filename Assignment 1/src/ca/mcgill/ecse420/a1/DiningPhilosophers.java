@@ -84,7 +84,10 @@ public class DiningPhilosophers {
 			while (true) {
 				try {
 					leftChopstick.lock();
+					leftChopstick.setFree(false);
+					sleepFor(50);
 					while (!rightChopstick.isFree()) {
+						leftChopstick.setFree(true);
 						left.await();
 					}
 

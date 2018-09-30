@@ -50,6 +50,10 @@ public class DiningPhilosophersDeadlock {
 			while (true) {
 				try {
 					leftChopstick.lock();
+					// Deadlocks immediately for sleeping after locking (All philosophers will get
+					// left chopstick)
+					System.out.println(philosopherName + " picked up left chopstick...");
+					sleepFor(50);
 					rightChopstick.lock();
 					System.out.println(philosopherName + " is eating...");
 					sleepFor(3000);
