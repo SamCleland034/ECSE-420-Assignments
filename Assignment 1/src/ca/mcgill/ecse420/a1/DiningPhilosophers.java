@@ -85,17 +85,17 @@ public class DiningPhilosophers {
 				try {
 					leftChopstick.lock();
 					leftChopstick.setFree(false);
-					sleepFor(50);
 					while (!rightChopstick.isFree()) {
 						leftChopstick.setFree(true);
 						left.await();
 					}
 
+					leftChopstick.setFree(false);
 					rightChopstick.lock();
 					rightChopstick.setFree(false);
 
 					System.out.println(philosopherName + " is eating...");
-					sleepFor(3000);
+					sleepFor(1000);
 				} catch (InterruptedException ix) {
 					logger.log(Level.SEVERE, ix.getMessage());
 				} finally {
@@ -109,7 +109,7 @@ public class DiningPhilosophers {
 						leftChopstick.unlock();
 					}
 
-					sleepFor(1000);
+					sleepFor(3000);
 				}
 			}
 		}
