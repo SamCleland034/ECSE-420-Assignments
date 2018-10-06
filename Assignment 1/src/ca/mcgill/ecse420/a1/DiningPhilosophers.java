@@ -83,22 +83,27 @@ public class DiningPhilosophers {
 
 			while (true) {
 				try {
+					// attempt to get left chopstick
 					leftChopstick.lock();
 					leftChopstick.setFree(false);
 					while (!rightChopstick.isFree()) {
+						// if can't get right chopstick then release left and wait for it to signal
 						leftChopstick.setFree(true);
 						left.await();
 					}
 
+					// means you got the right chopstick, making sure left is set to not available
 					leftChopstick.setFree(false);
 					rightChopstick.lock();
 					rightChopstick.setFree(false);
 
+					// philosopher eats
 					System.out.println(philosopherName + " is eating...");
 					sleepFor(1000);
 				} catch (InterruptedException ix) {
 					logger.log(Level.SEVERE, ix.getMessage());
 				} finally {
+					// release chopsticks once done
 					if (rightChopstick.isHeldByCurrentThread()) {
 						rightChopstick.setFree(true);
 						rightChopstick.unlock();

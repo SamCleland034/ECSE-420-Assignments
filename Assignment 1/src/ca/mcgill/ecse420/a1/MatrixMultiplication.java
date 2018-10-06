@@ -138,6 +138,8 @@ public class MatrixMultiplication {
 			int bColumns = b[0].length;
 
 			// only take portion of the rows based on the thread's index
+			// no race conditions since the threads are updating different parts of the
+			// arrays
 			for (int i = index; i < index + portion; i++) {
 				for (int j = 0; j < aRows; j++) {
 					for (int k = 0; k < bColumns; k++) {
