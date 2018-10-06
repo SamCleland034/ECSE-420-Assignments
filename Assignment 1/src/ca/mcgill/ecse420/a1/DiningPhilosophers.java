@@ -109,7 +109,7 @@ public class DiningPhilosophers {
 						leftChopstick.unlock();
 					}
 
-					sleepFor(3000);
+					sleepFor(1500);
 				}
 			}
 		}

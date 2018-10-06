@@ -10,7 +10,7 @@ public class DiningPhilosophersDeadlock {
 
 	private static ReentrantLock[] chopsticks;
 	private static int numberOfPhilosophers = 10;
-	private static final Logger logger = Logger.getLogger(DiningPhilosophers.class.getName());
+	private static final Logger logger = Logger.getLogger(DiningPhilosophersDeadlock.class.getName());
 
 	public static void main(String[] args) {
 
