@@ -5,13 +5,25 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 
+/*
+ * Exemplifies the Filter lock that was described in class
+ * @author Sam Cleland and Wiam El Ouadi
+ */
 public class Filter implements Lock {
-	volatile int[] level; // level[i] for thread i
-	volatile int[] victim; // victim[L] for level L
+	// level[i] for thread i
+	volatile int[] level;
+	// victim[L] for level L
+	volatile int[] victim;
+	// number of elements
 	int number;
+	// using atomic integer incase there is a context switch in the increment
 	AtomicInteger counter = new AtomicInteger();
+	// current thread that is running (0- (n-1))
 	int currentThread;
 
+	/*
+	 * Constructs a filter with n-1 levels and n victim slots
+	 */
 	public Filter(int n) {
 		level = new int[n];
 		victim = new int[n];
@@ -21,6 +33,9 @@ public class Filter implements Lock {
 		}
 	}
 
+	/*
+	 * Exemplifies the filter lock algorithm described in class
+	 */
 	@Override
 	public void lock() {
 		int id = counter.getAndIncrement();
@@ -60,6 +75,9 @@ public class Filter implements Lock {
 		return false;
 	}
 
+	/*
+	 * Unlocks the thread by making its level 0, no interest in getting in
+	 */
 	@Override
 	public void unlock() {
 		level[currentThread] = 0;

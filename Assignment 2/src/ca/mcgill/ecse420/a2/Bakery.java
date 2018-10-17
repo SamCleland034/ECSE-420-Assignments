@@ -8,6 +8,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 
+/**
+ * Implements the Bakery Lock described in class
+ * 
+ * @author Sam Cleland and Wiam El Ouadi
+ *
+ */
 public class Bakery implements Lock {
 	volatile boolean[] flag;
 	volatile List<Integer> label;
@@ -23,6 +29,11 @@ public class Bakery implements Lock {
 		}
 	}
 
+	/**
+	 * Exemplifies the bakery algorithm shown in class, using an atomic integer to
+	 * keep track of threads. If there is a tie with a label then using the
+	 * lexiographic ordering
+	 */
 	@Override
 	public void lock() {
 		int id = counter.getAndIncrement();
