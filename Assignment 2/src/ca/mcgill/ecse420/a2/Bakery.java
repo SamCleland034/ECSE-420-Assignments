@@ -4,16 +4,19 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 
 public class Bakery implements Lock {
 	volatile boolean[] flag;
 	volatile List<Integer> label;
+	volatile AtomicInteger counter = new AtomicInteger();
+	int currentThread;
 
 	public Bakery(int n) {
 		flag = new boolean[n];
-		label = new ArrayList<Integer>();
+		label = new ArrayList<Integer>(n);
 		for (int i = 0; i < n; i++) {
 			flag[i] = false;
 			label.add(0);
@@ -22,7 +25,7 @@ public class Bakery implements Lock {
 
 	@Override
 	public void lock() {
-		int id = (int) Thread.currentThread().getId();
+		int id = counter.getAndIncrement();
 		flag[id] = true;
 		label.set(id, Collections.max(label) + 1);
 		for (int k = 0; k < label.size(); k++) {
@@ -30,6 +33,8 @@ public class Bakery implements Lock {
 				continue;
 			}
 		}
+
+		currentThread = id;
 	}
 
 	@Override
@@ -58,6 +63,6 @@ public class Bakery implements Lock {
 
 	@Override
 	public void unlock() {
-		flag[(int) Thread.currentThread().getId()] = false;
+		flag[currentThread] = false;
 	}
 }

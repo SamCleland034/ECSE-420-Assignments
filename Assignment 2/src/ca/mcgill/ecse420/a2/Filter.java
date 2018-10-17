@@ -1,6 +1,7 @@
 package ca.mcgill.ecse420.a2;
 
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 
@@ -8,6 +9,8 @@ public class Filter implements Lock {
 	volatile int[] level; // level[i] for thread i
 	volatile int[] victim; // victim[L] for level L
 	int number;
+	AtomicInteger counter = new AtomicInteger();
+	int currentThread;
 
 	public Filter(int n) {
 		level = new int[n];
@@ -20,21 +23,22 @@ public class Filter implements Lock {
 
 	@Override
 	public void lock() {
-		int id = (int) Thread.currentThread().getId();
+		int id = counter.getAndIncrement();
 		for (int L = 1; L < number; L++) {
 			level[id] = L;
 			victim[L] = id;
 			for (int k = 0; k < number; k++) {
-				while (k != id && victim[L] == id) {
+				while ((k != id && level[k] >= L) && victim[L] == id) {
 					continue;
 				}
 			}
 		}
+
+		currentThread = id;
 	}
 
 	@Override
 	public void lockInterruptibly() throws InterruptedException {
-		// TODO Auto-generated method stub
 
 	}
 
@@ -58,6 +62,6 @@ public class Filter implements Lock {
 
 	@Override
 	public void unlock() {
-		level[(int) Thread.currentThread().getId()] = 0;
+		level[currentThread] = 0;
 	}
 }
