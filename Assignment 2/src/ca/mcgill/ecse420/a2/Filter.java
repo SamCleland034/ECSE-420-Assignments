@@ -1,7 +1,6 @@
 package ca.mcgill.ecse420.a2;
 
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 
@@ -16,8 +15,6 @@ public class Filter implements Lock {
 	volatile int[] victim;
 	// number of elements
 	int number;
-	// using atomic integer incase there is a context switch in the increment
-	AtomicInteger counter = new AtomicInteger();
 	// current thread that is running (0- (n-1))
 	int currentThread;
 
@@ -38,7 +35,7 @@ public class Filter implements Lock {
 	 */
 	@Override
 	public void lock() {
-		int id = counter.getAndIncrement();
+		int id = (int) (Thread.currentThread().getId() % victim.length);
 		for (int L = 1; L < number; L++) {
 			level[id] = L;
 			victim[L] = id;
