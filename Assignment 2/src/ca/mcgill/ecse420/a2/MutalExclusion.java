@@ -75,31 +75,31 @@ public class MutalExclusion {
 		public void run() {
 			if (lock == null) {
 				for (int i = 0; i < 20; i++) {
-					int number = counter;
-					try {
-						Thread.sleep(1);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-					number += 1;
-					counter = number;
+					increment();
 				}
 			} else {
 				for (int i = 0; i < 20; i++) {
 					lock.lock();
-					int number = counter;
-					try {
-						Thread.sleep(1);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-					number += 1;
-					counter = number;
+					increment();
 					lock.unlock();
 				}
 			}
 
 			latch.countDown();
+		}
+
+		/*
+		 * Increments the counter variable with a sleep to exemplify mutual exclusion
+		 */
+		private void increment() {
+			int number = counter;
+			try {
+				Thread.sleep(1);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			number += 1;
+			counter = number;
 		}
 	}
 }
