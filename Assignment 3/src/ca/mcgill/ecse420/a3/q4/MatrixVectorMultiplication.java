@@ -15,20 +15,20 @@ public class MatrixVectorMultiplication {
 	public static double[] result;
 	public static double[][] matrix;
 	public static double[] vector;
-	public static int cores = 2;
+	public static int cores = 6;
 	public static Logger logger = Logger.getLogger(MatrixVectorMultiplication.class.getName());
-
 
 	public static void main(String[] args) {
 		service = Executors.newCachedThreadPool();
-		int num = 5000;
+		int num = 12000;
 		matrix = generateRandomMatrix(num, num);
 		vector = generateRandomVector(num);
 		result = new double[num];
 		long start = System.currentTimeMillis();
-		seqMultiply();
+		seqMultiplyStream();
 		long diff1 = System.currentTimeMillis() - start;
 		System.out.println("Sequential: " + diff1 + " milliseconds");
+		result = new double[num];
 		start = System.currentTimeMillis();
 		paraMultiply();
 		long diff2 = System.currentTimeMillis() - start;
@@ -64,7 +64,7 @@ public class MatrixVectorMultiplication {
 	}
 
 	public static void paraMultiply() {
-		Future<?> value = service.submit(new MatrixBreakdownTask(0, matrix.length - 1, 0));
+		Future<?> value = service.submit(new MatrixBreakdownTask(0, vector.length - 1, 0));
 		try {
 			value.get();
 		} catch (InterruptedException intx) {
@@ -75,27 +75,22 @@ public class MatrixVectorMultiplication {
 			exx.printStackTrace();
 		}
 	}
+
 	public static void seqMultiply() {
-	    int rows = matrix.length;
-	    int columns = matrix[0].length;
-
-	    double[] result = new double[rows];
-
-	    for (int i = 0; i < rows; i++) {
-	        double sum = 0;
-	        for (int j = 0; j < columns; j++) {
-	            sum += matrix[i][j] * vector[j];
-	        }
-	        result[i] = sum;
-	    }
+		int rows = matrix.length;
+		int columns = matrix[0].length;
+		for (int i = 0; i < rows; i++) {
+			double sum = 0;
+			for (int j = 0; j < columns; j++) {
+				sum += matrix[i][j] * vector[j];
+			}
+			result[i] = sum;
+		}
 	}
 
 	public static void seqMultiplyStream() {
-	    result = Arrays.stream(matrix)
-	                 .mapToDouble(
-	                		 row -> IntStream.range(0, row.length)
-	                             .mapToDouble(col -> row[col] * vector[col])
-	                             .sum())
-	                 .toArray();
+		result = Arrays.stream(matrix)
+				.mapToDouble(row -> IntStream.range(0, row.length).mapToDouble(col -> row[col] * vector[col]).sum())
+				.toArray();
 	}
 }

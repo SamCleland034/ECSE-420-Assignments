@@ -24,14 +24,16 @@ public class CalculationTask implements Callable<Double> {
 
 	@Override
 	public Double call() throws Exception {
-		if(start == end) {
+		if (start == end) {
 			return matrix[row][start] * vector[start];
 		}
 
-		if(level < Math.log(cores) / Math.log(2)) {
+		if (level < (int) Math.log10(cores) / Math.log(2)) {
 			Future<Double>[] values = new Future[2];
-			values[0] = MatrixVectorMultiplication.service.submit(new CalculationTask(row, start, (start + end) / 2, 0));
-			values[1] = MatrixVectorMultiplication.service.submit(new CalculationTask(row, (start + end) / 2, end, 0));
+			values[0] = MatrixVectorMultiplication.service
+					.submit(new CalculationTask(row, start, (start + end) / 2, level + 1));
+			values[1] = MatrixVectorMultiplication.service
+					.submit(new CalculationTask(row, (start + end) / 2, end, level + 1));
 			return values[0].get() + values[1].get();
 		}
 
