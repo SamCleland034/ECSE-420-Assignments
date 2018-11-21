@@ -15,12 +15,12 @@ public class MatrixVectorMultiplication {
 	public static double[] result;
 	public static double[][] matrix;
 	public static double[] vector;
-	public static int cores = 6;
+	public static int cores = 2;
 	public static Logger logger = Logger.getLogger(MatrixVectorMultiplication.class.getName());
 
 	public static void main(String[] args) {
 		service = Executors.newCachedThreadPool();
-		int num = 12000;
+		int num = 2000;
 		matrix = generateRandomMatrix(num, num);
 		vector = generateRandomVector(num);
 		result = new double[num];
