@@ -8,8 +8,10 @@ public class TestBoundedArrayQueue {
 
 	public static void main(String[] args) {
 		ExecutorService service = Executors.newCachedThreadPool();
-		BoundedArrayQueue.populateSlots();
-		IntStream.range(0, 50).forEach(i -> service.execute(new BoundedArrayQueue()));
+		LockFreeBoundedArrayQueue.populateSlots();
+		IntStream.range(0, 10).forEach(i -> service.execute(new LockFreeBoundedArrayQueue()));
+		//BoundedArrayQueue.populateSlots();
+		//IntStream.range(0, 50).forEach(i -> service.execute(new BoundedArrayQueue()));
 		service.shutdown();
 	}
 
