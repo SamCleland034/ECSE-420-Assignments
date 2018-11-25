@@ -48,8 +48,7 @@ public class LockFreeBoundedArrayQueue implements Runnable {
 		}
 
 		int headVal = head.get();
-		AtomicReference<Integer> current = slots[headVal % slots.length];
-		int currentVal = current.get();
+		int currentVal = slots[headVal % slots.length].get();
 		if(head.compareAndSet(headVal, headVal + 1)) {
 			System.out.println("Dequeued " + currentVal + " from Thread " + Thread.currentThread().getId());
 			return currentVal;
@@ -65,11 +64,13 @@ public class LockFreeBoundedArrayQueue implements Runnable {
 			value = rand.nextInt(100);
 			int counter = 1;
 			while(!enqueue(value)) {
+				// Exponential Backoff if it fails
 				sleepFor((int) Math.pow(2, counter++));
 			}
 		} else {
 			int counter = 1;
 			while(dequeue() == -1) {
+				// Exponential Backoff if it fails
 				sleepFor((int) Math.pow(2, counter++));
 			}
 		}

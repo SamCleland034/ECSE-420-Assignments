@@ -1,6 +1,5 @@
 package ca.mcgill.ecse420.a3.q4;
 
-import java.util.Arrays;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -20,22 +19,30 @@ public class MatrixVectorMultiplication {
 
 	public static void main(String[] args) {
 		service = Executors.newCachedThreadPool();
-		int num = 2000;
+		int num = 10000;
 		matrix = generateRandomMatrix(num, num);
 		vector = generateRandomVector(num);
 		result = new double[num];
+		cores = 1;
 		long start = System.currentTimeMillis();
-		seqMultiplyStream();
+		paraMultiply();
 		long diff1 = System.currentTimeMillis() - start;
 		System.out.println("Sequential: " + diff1 + " milliseconds");
 		result = new double[num];
-		start = System.currentTimeMillis();
+		cores = 2;
+		long start2 = System.currentTimeMillis();
 		paraMultiply();
-		long diff2 = System.currentTimeMillis() - start;
+		long diff2 = System.currentTimeMillis() - start2;
 		System.out.println("Parallel with " + cores + " cores: " + diff2 + " milliseconds");
 		System.out.println("Speedup with " + cores + " cores: " + diff1 / (double) diff2);
 		service.shutdown();
 
+	}
+
+	private static void printResult() {
+		IntStream.range(0, result.length).forEach(i ->
+		System.out.print(result[i] + " "));
+		System.out.println();
 	}
 
 	public static double[] generateRandomVector(int numRows) {
@@ -89,8 +96,7 @@ public class MatrixVectorMultiplication {
 	}
 
 	public static void seqMultiplyStream() {
-		result = Arrays.stream(matrix)
-				.mapToDouble(row -> IntStream.range(0, row.length).mapToDouble(col -> row[col] * vector[col]).sum())
-				.toArray();
+		IntStream.range(0, vector.length).forEach(i -> IntStream.range(0, vector.length)
+				.forEach(j -> result[i] += matrix[i][j]*vector[j]));
 	}
 }
