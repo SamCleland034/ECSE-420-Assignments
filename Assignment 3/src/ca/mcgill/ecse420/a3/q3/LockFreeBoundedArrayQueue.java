@@ -31,9 +31,11 @@ public class LockFreeBoundedArrayQueue implements Runnable {
 			return false;
 		}
 
+		// Get the current tail value
 		int tailVal = tail.get();
 		AtomicReference<Integer> next = slots[(tailVal) % slots.length];
 		int currentVal = next.get();
+		// Check if anything has changed, if nothing changed operation was successful and continue, else have to back off.
 		if(next.compareAndSet(currentVal, value) && tail.compareAndSet(tailVal, tailVal + 1)) {
 			System.out.println("Enqueued " + value + " from Thread " + Thread.currentThread().getId() + " POV");
 			return true;
@@ -49,6 +51,7 @@ public class LockFreeBoundedArrayQueue implements Runnable {
 
 		int headVal = head.get();
 		int currentVal = slots[headVal % slots.length].get();
+		// check if value of the head changed, if so then have to back off
 		if(head.compareAndSet(headVal, headVal + 1)) {
 			System.out.println("Dequeued " + currentVal + " from Thread " + Thread.currentThread().getId());
 			return currentVal;

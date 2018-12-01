@@ -32,21 +32,28 @@ public class FineGrainedAlgorithm implements Runnable {
 		Node current = head;
 		Node next;
 
-		if(current.equals(o)) {
-			head = current.getNext();
+		if (current.equals(o)) {
+			// Just make head point to the next node
+			synchronized (current) {
+				head = current.getNext();
+			}
+
 			return true;
 		}
 
+		// Hand over hand locking until we get to the node we want to remove
 		while(current.getNext() != null) {
 			synchronized (current) {
 				synchronized (next = current.getNext()) {
 					if (next.equals(o)) {
+						// Switch the pointers of the node
 						current.setNext(next.getNext());
 						next.setNext(null);
 						size--;
 						return true;
 					}
 
+					// Go to next node
 					current = current.getNext();
 				}
 			}
@@ -56,17 +63,22 @@ public class FineGrainedAlgorithm implements Runnable {
 	}
 
 	public static boolean add(Node node, int index) {
+		// Start at head
 		Node current;
 		current = head;
 		int count = 0;
+		// If the node we want to add is at the head, don't have to lock the next node.
+		// Just make head the new node
 		if (index == 0) {
 			node.setNext(current);
 			head = node;
 			return true;
 		}
 
+		// Traverse the list, hand over hand locking in this case
 		while (count <= size && current != null) {
 			synchronized (current) {
+				// If we find the node we are looking for
 				if (count + 1 == index) {
 					Node next = current.getNext();
 					current.setNext(node);
@@ -75,6 +87,7 @@ public class FineGrainedAlgorithm implements Runnable {
 					return true;
 				}
 
+				// Go to next node
 				current = current.getNext();
 				count++;
 			}
@@ -86,6 +99,8 @@ public class FineGrainedAlgorithm implements Runnable {
 	public static boolean contains(Node o) {
 		Node current = head;
 		do {
+			// Traverse the list from the head 1 node at a time
+			// Locking each node using the synchronized keyword
 			synchronized(current) {
 				if(current.equals(o)) {
 					return true;
@@ -100,7 +115,8 @@ public class FineGrainedAlgorithm implements Runnable {
 
 	@Override
 	public void run() {
-		int random = Math.abs(rand.nextInt() % 3);
+		// Generate random value to correspond to a random task
+		int random = rand.nextInt(3);
 		if(random == 0) {
 			int value = getRandomValue();
 			Node current = new Node(null);
@@ -112,7 +128,9 @@ public class FineGrainedAlgorithm implements Runnable {
 			do {
 				value = getRandomValue();
 				for (int i = 0; i < value; i++) {
+					// If the node was modified, try again
 					if (current == null) {
+						i = 0;
 						value = getRandomValue();
 						current = head;
 					}
@@ -130,6 +148,7 @@ public class FineGrainedAlgorithm implements Runnable {
 				value = getRandomValue();
 				for (int i = 0; i < value; i++) {
 					if (current == null) {
+						i = 0;
 						value = getRandomValue();
 						current = head;
 					}
@@ -141,10 +160,11 @@ public class FineGrainedAlgorithm implements Runnable {
 			System.out.println("Contains on node with key " + current.getKey() + " from thread " + Thread.currentThread().getId() + " = " + contains(current));
 		}
 
+		// Print the state of the list
 		printList();
 	}
 
 	private int getRandomValue() {
-		return Math.abs(rand.nextInt() % size);
+		return rand.nextInt(size);
 	}
 }
