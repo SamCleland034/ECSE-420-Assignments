@@ -14,16 +14,15 @@ public class MatrixVectorMultiplication {
 	public static double[] result;
 	public static double[][] matrix;
 	public static double[] vector;
-	public static int cores = 2;
+	public static int cores = 1;
 	public static Logger logger = Logger.getLogger(MatrixVectorMultiplication.class.getName());
 
 	public static void main(String[] args) {
 		service = Executors.newCachedThreadPool();
-		int num = 1001;
+		int num = 10000;
 		matrix = generateRandomMatrix(num, num);
 		vector = generateRandomVector(num);
 		result = new double[num];
-		cores = 1;
 		long start = System.currentTimeMillis();
 		paraMultiply();
 		long diff1 = System.currentTimeMillis() - start;
