@@ -14,15 +14,18 @@ public class MatrixVectorMultiplication {
 	public static double[] result;
 	public static double[][] matrix;
 	public static double[] vector;
+	public static double[][] preResult;
 	public static int cores = 1;
 	public static Logger logger = Logger.getLogger(MatrixVectorMultiplication.class.getName());
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws InterruptedException {
 		service = Executors.newCachedThreadPool();
-		int num = 10000;
+		int num = 5;
 		matrix = generateRandomMatrix(num, num);
 		vector = generateRandomVector(num);
 		result = new double[num];
+		preResult = new double[num][num];
+		Thread.sleep(10);
 		long start = System.currentTimeMillis();
 		paraMultiply();
 		long diff1 = System.currentTimeMillis() - start;
@@ -48,7 +51,7 @@ public class MatrixVectorMultiplication {
 
 	public static double[] generateRandomVector(int numRows) {
 		double vector[] = new double[numRows];
-		IntStream.range(0, numRows).forEach(i -> vector[i] = Math.random() * 10.0);
+		IntStream.range(0, numRows).forEach(i -> vector[i] = (int) (Math.random() * 10.0));
 		return vector;
 	}
 
@@ -72,9 +75,11 @@ public class MatrixVectorMultiplication {
 	}
 
 	public static void paraMultiply() {
-		Future<?> value = service.submit(new MatrixBreakdownTask(0, matrix.length - 1, 0, vector.length - 1, 0));
 		try {
+			Future<?> value = service.submit(new MatrixBreakdownTask(0, matrix.length - 1, 0, vector.length - 1, 0));
 			value.get();
+			Future<?> calculation = service.submit(new ParallelRowCalculationTask(0, matrix.length - 1, 0));
+			calculation.get();
 		} catch (InterruptedException intx) {
 			logger.log(Level.SEVERE, intx.getMessage());
 			intx.printStackTrace();

@@ -24,13 +24,14 @@ public class MatrixBreakdownTask implements Callable<Object> {
 
 	@Override
 	public Object call() throws Exception {
+		// Base case, perform computation for 1 element of the preResult matrix to get ready for parallel addition afterwards
 		if (startMatrix == endMatrix && startVector == endVector) {
-			MatrixVectorMultiplication.result[startMatrix] += matrix[startMatrix][startVector] * vector[startVector];
-
+			MatrixVectorMultiplication.preResult[startMatrix][startVector] = matrix[startMatrix][startVector] * vector[startVector];
 			return null;
 		}
 
-		if (level < (int) Math.log10(cores) / Math.log(2)) {
+		// Parallel portion, dictated by how many threads are used
+		if (level < Math.log10(cores) / Math.log10(2)) {
 			Future<Object>[] tasks = new Future[4];
 			tasks[0] = MatrixVectorMultiplication.service
 					.submit(new MatrixBreakdownTask(startMatrix, (int) Math.floor((startMatrix + endMatrix) / 2), startVector, (int) Math.floor((startVector + endVector) / 2), level + 1));
@@ -47,8 +48,9 @@ public class MatrixBreakdownTask implements Callable<Object> {
 			return null;
 		}
 
+		// Sequential portion once all of the cores are in use
 		IntStream.range(startMatrix, endMatrix + 1).forEach(i -> IntStream.range(startVector, endVector + 1)
-				.forEach(j -> MatrixVectorMultiplication.result[i] += matrix[i][j] * vector[j]));
+				.forEach(j -> MatrixVectorMultiplication.preResult[i][j] = matrix[i][j] * vector[j]));
 
 		return null;
 	}
