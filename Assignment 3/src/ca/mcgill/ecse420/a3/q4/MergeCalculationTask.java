@@ -35,10 +35,11 @@ public class MergeCalculationTask implements Callable<Double> {
 		// Divide until we get to 2 elements next to each other or an element by itself
 		if (level < Math.log10(cores) / Math.log10(2)) {
 			Future<Double>[] tasks = new Future[2];
-			tasks[0] = MatrixVectorMultiplication.service.submit(new MergeCalculationTask(row, start, (int) Math.floor((start + end) / 2), level + 1));
-			// Have to check if ceiling variable is odd or even so we don't add the same value twice
+			int floor = (int) Math.floor((start + end) / 2);
 			int ceiling = (int) Math.ceil((start + end) / 2);
-			tasks[1] = MatrixVectorMultiplication.service.submit(new MergeCalculationTask(row, ceiling % 2 == 0 ? ceiling : ceiling + 1, end, level + 1));
+			tasks[0] = MatrixVectorMultiplication.service.submit(new MergeCalculationTask(row, start, floor, level + 1));
+			// Have to check if ceiling variable is odd or even so we don't add the same value twice
+			tasks[1] = MatrixVectorMultiplication.service.submit(new MergeCalculationTask(row, ceiling == floor ? ceiling + 1: ceiling, end, level + 1));
 			return tasks[0].get() + tasks[1].get();
 		}
 

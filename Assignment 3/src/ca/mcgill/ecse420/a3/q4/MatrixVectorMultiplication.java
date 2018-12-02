@@ -20,7 +20,7 @@ public class MatrixVectorMultiplication {
 
 	public static void main(String[] args) throws InterruptedException {
 		service = Executors.newCachedThreadPool();
-		int num = 5;
+		int num = 2000;
 		matrix = generateRandomMatrix(num, num);
 		vector = generateRandomVector(num);
 		result = new double[num];
