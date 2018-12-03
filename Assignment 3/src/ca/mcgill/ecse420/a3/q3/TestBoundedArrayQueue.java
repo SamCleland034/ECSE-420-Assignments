@@ -5,6 +5,13 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.IntStream;
 
+/**
+ * Test program for BoundedArrayQueue and the lock free version,
+ * creates threads to run random tasks of each of the classes
+ *
+ * @author Sam Cleland
+ *
+ */
 public class TestBoundedArrayQueue {
 
 	public static void main(String[] args) {

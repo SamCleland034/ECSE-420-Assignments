@@ -4,6 +4,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.IntStream;
 
+/**
+ * Test program that creates threads to run the methods provided in FineGrainedAlgorithm.java
+ * @author Sam Cleland
+ *
+ */
 public class TestFineGrained {
 
 	public static void main(String[] args) {

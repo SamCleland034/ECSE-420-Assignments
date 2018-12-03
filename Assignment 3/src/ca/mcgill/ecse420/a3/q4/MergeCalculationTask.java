@@ -4,6 +4,12 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.stream.IntStream;
 
+/**
+ * Does parallel calculations in log(n) speed to overcome the bottleneck
+ *
+ * @author Sam Cleland
+ *
+ */
 public class MergeCalculationTask implements Callable<Double> {
 
 	private int row;
@@ -38,7 +44,7 @@ public class MergeCalculationTask implements Callable<Double> {
 			int floor = (int) Math.floor((start + end) / 2);
 			int ceiling = (int) Math.ceil((start + end) / 2);
 			tasks[0] = MatrixVectorMultiplication.service.submit(new MergeCalculationTask(row, start, floor, level + 1));
-			// Have to check if ceiling variable is odd or even so we don't add the same value twice
+			// Have to check if ceiling is equal to floor so we don't add the same value twice
 			tasks[1] = MatrixVectorMultiplication.service.submit(new MergeCalculationTask(row, ceiling == floor ? ceiling + 1: ceiling, end, level + 1));
 			return tasks[0].get() + tasks[1].get();
 		}

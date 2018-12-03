@@ -5,6 +5,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.IntStream;
 
+/**
+ * Lock free version of Bounded Array Queue
+ * @author Sam Cleland
+ *
+ */
 public class LockFreeBoundedArrayQueue implements Runnable {
 	public static AtomicReference<Integer>[] slots = new AtomicReference[10];
 	public static volatile AtomicInteger tail = new AtomicInteger();

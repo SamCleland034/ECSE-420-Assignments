@@ -7,6 +7,12 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.IntStream;
 
+/**
+ * Bounded Array Queue implemented with locks
+ *
+ * @author Sam Cleland
+ *
+ */
 public class BoundedArrayQueue implements Runnable {
 
 	public static int[] slots = new int[10];

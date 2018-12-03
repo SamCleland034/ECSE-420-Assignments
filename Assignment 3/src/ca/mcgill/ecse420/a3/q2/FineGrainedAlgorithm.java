@@ -8,10 +8,13 @@ public class FineGrainedAlgorithm implements Runnable {
 	static Random rand = new Random();
 	public static volatile Node head = new Node(null);
 	public static volatile int size = 1;
+	private static int startingSize = 50;
+	private static volatile int removeCounter = 49;
+	private static volatile int containsCounter = 49;
 
 	public static void populateList() {
 		System.out.println("Generated List: ");
-		IntStream.range(0, 10).forEach(i -> add(new Node(null), size));
+		IntStream.range(0, startingSize).forEach(i -> add(new Node(null), size));
 	}
 
 	public static void printList() {
@@ -47,6 +50,8 @@ public class FineGrainedAlgorithm implements Runnable {
 				synchronized (next = current.getNext()) {
 					if (next.equals(o)) {
 						// Switch the pointers of the node
+						System.out.println("Removed node with key " + next.getKey() + " from thread " + Thread.currentThread().getId());
+
 						current.setNext(next.getNext());
 						next.setNext(null);
 						size--;
@@ -97,6 +102,7 @@ public class FineGrainedAlgorithm implements Runnable {
 	}
 
 	public static boolean contains(Node o) {
+		System.out.println("Contains on key " + o.getKey());
 		Node current = head;
 		do {
 			// Traverse the list from the head 1 node at a time
@@ -116,47 +122,45 @@ public class FineGrainedAlgorithm implements Runnable {
 	@Override
 	public void run() {
 		// Generate random value to correspond to a random task
-		int random = rand.nextInt(3);
-		if(random == 0) {
-			int value = getRandomValue();
-			Node current = new Node(null);
-			System.out.println("Adding new node at position " + value + " with key " + current.getKey() + " from thread " + Thread.currentThread().getId());
-			add(current, value);
-		} else if (random == 1) {
+		int random = rand.nextInt(2) + 1;
+		if (random == 1) {
 			Node current = head;
 			int value;
 			do {
-				value = getRandomValue();
+				value = removeCounter;
 				for (int i = 0; i < value; i++) {
 					// If the node was modified, try again
 					if (current == null) {
 						i = 0;
-						value = getRandomValue();
+						value = removeCounter;
 						current = head;
+						continue;
 					}
 
 					current = current.getNext();
 				}
 			} while (current == null);
 
+			removeCounter--;
 			System.out.println("Removing node at position " + value + " with key " + current.getKey() + " from thread " + Thread.currentThread().getId());
 			remove(current);
 		} else {
 			Node current = head;
 			int value;
 			do {
-				value = getRandomValue();
+				value = containsCounter;
 				for (int i = 0; i < value; i++) {
 					if (current == null) {
 						i = 0;
-						value = getRandomValue();
+						value = containsCounter;
 						current = head;
+						continue;
 					}
 
 					current = current.getNext();
 				}
 			} while (current == null);
-
+			containsCounter--;
 			System.out.println("Contains on node with key " + current.getKey() + " from thread " + Thread.currentThread().getId() + " = " + contains(current));
 		}
 
@@ -165,6 +169,6 @@ public class FineGrainedAlgorithm implements Runnable {
 	}
 
 	private int getRandomValue() {
-		return rand.nextInt(size);
+		return rand.nextInt(size - 1);
 	}
 }

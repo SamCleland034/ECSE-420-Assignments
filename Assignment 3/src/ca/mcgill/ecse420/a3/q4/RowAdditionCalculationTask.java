@@ -4,13 +4,20 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.stream.IntStream;
 
-public class ParallelRowCalculationTask implements Callable<Object> {
+/**
+ * Breaks up the rows of the preResult matrix and then submits a
+ * MultiplicationCalculationTask to calculate the result value of that row
+ *
+ * @author Sam Cleland
+ *
+ */
+public class RowAdditionCalculationTask implements Callable<Object> {
 	private int start;
 	private int end;
 	private int cores = MatrixVectorMultiplication.cores;
 	private int level;
 
-	public ParallelRowCalculationTask(int startRow, int endRow, int level) {
+	public RowAdditionCalculationTask(int startRow, int endRow, int level) {
 		this.start = startRow;
 		this.end = endRow;
 		this.level = level;
@@ -30,8 +37,8 @@ public class ParallelRowCalculationTask implements Callable<Object> {
 			Future<Object>[] tasks = new Future[2];
 			int floor = (int) Math.floor((start + end) / 2);
 			int ceiling = (int) Math.ceil((start + end) / 2);
-			tasks[0] = MatrixVectorMultiplication.service.submit(new ParallelRowCalculationTask(start, floor, level + 1));
-			tasks[1] = MatrixVectorMultiplication.service.submit(new ParallelRowCalculationTask(ceiling == floor ? ceiling + 1 : ceiling, end, level + 1));
+			tasks[0] = MatrixVectorMultiplication.service.submit(new RowAdditionCalculationTask(start, floor, level + 1));
+			tasks[1] = MatrixVectorMultiplication.service.submit(new RowAdditionCalculationTask(ceiling == floor ? ceiling + 1 : ceiling, end, level + 1));
 			tasks[0].get();
 			tasks[1].get();
 			return null;

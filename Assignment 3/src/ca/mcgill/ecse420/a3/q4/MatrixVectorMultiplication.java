@@ -8,6 +8,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.IntStream;
 
+/**
+ * Test program to test the functionality of sequential and parallel matrix vector multiplication
+ *
+ * @author Sam Cleland
+ *
+ */
 public class MatrixVectorMultiplication {
 
 	public static ExecutorService service;
@@ -25,18 +31,15 @@ public class MatrixVectorMultiplication {
 		vector = generateRandomVector(num);
 		result = new double[num];
 		preResult = new double[num][num];
-		Thread.sleep(10);
 		long start = System.currentTimeMillis();
 		paraMultiply();
 		long diff1 = System.currentTimeMillis() - start;
-		printResult();
 		System.out.println("Sequential: " + diff1 + " milliseconds");
 		result = new double[num];
-		cores = 2;
+		cores = 200;
 		long start2 = System.currentTimeMillis();
 		paraMultiply();
 		long diff2 = System.currentTimeMillis() - start2;
-		printResult();
 		System.out.println("Parallel with " + cores + " cores: " + diff2 + " milliseconds");
 		System.out.println("Speedup with " + cores + " cores: " + diff1 / (double) diff2);
 		service.shutdown();
@@ -76,9 +79,9 @@ public class MatrixVectorMultiplication {
 
 	public static void paraMultiply() {
 		try {
-			Future<?> value = service.submit(new MatrixBreakdownTask(0, matrix.length - 1, 0, vector.length - 1, 0));
+			Future<?> value = service.submit(new MatrixBreakdownTask(0, matrix.length - 1, 0));
 			value.get();
-			Future<?> calculation = service.submit(new ParallelRowCalculationTask(0, matrix.length - 1, 0));
+			Future<?> calculation = service.submit(new RowAdditionCalculationTask(0, matrix.length - 1, 0));
 			calculation.get();
 		} catch (InterruptedException intx) {
 			logger.log(Level.SEVERE, intx.getMessage());
