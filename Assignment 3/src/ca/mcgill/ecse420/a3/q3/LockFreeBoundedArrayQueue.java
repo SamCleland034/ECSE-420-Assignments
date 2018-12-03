@@ -38,10 +38,11 @@ public class LockFreeBoundedArrayQueue implements Runnable {
 
 		// Get the current tail value
 		int tailVal = tail.get();
-		AtomicReference<Integer> next = slots[(tailVal) % slots.length];
+		AtomicReference<Integer> next = slots[(tailVal) % (slots.length)];
 		int currentVal = next.get();
 		// Check if anything has changed, if nothing changed operation was successful and continue, else have to back off.
-		if(next.compareAndSet(currentVal, value) && tail.compareAndSet(tailVal, tailVal + 1)) {
+		if(tail.compareAndSet(tailVal, tailVal + 1)) {
+			while(!next.compareAndSet(currentVal, value));
 			System.out.println("Enqueued " + value + " from Thread " + Thread.currentThread().getId() + " POV");
 			return true;
 		}

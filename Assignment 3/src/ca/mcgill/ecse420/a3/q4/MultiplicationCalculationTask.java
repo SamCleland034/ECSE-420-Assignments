@@ -33,6 +33,7 @@ public class MultiplicationCalculationTask implements Callable<Object> {
 	public Double call() throws Exception {
 		if(start == end) {
 			MatrixVectorMultiplication.preResult[row][start] = matrix[row][start] * vector[start];
+			return null;
 		}
 
 		if(level < Math.log10(cores) / Math.log10(2)) {
@@ -43,6 +44,7 @@ public class MultiplicationCalculationTask implements Callable<Object> {
 			tasks[1] = MatrixVectorMultiplication.service.submit(new MultiplicationCalculationTask(row, ceiling == floor ? ceiling + 1 : ceiling, end, level + 1));
 			tasks[0].get();
 			tasks[1].get();
+			return null;
 		}
 
 		IntStream.range(start, end + 1).forEach(i ->
