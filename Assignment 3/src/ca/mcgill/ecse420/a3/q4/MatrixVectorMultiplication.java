@@ -26,7 +26,7 @@ public class MatrixVectorMultiplication {
 
 	public static void main(String[] args) throws InterruptedException {
 		service = Executors.newCachedThreadPool();
-		int num = 2;
+		int num = 2000;
 		matrix = generateRandomMatrix(num, num);
 		vector = generateRandomVector(num);
 		result = new double[num];
@@ -34,14 +34,12 @@ public class MatrixVectorMultiplication {
 		long start = System.currentTimeMillis();
 		paraMultiply();
 		long diff1 = System.currentTimeMillis() - start;
-		printResult();
 		System.out.println("Sequential: " + diff1 + " milliseconds");
 		result = new double[num];
-		cores = 200;
+		cores = 2;
 		long start2 = System.currentTimeMillis();
 		paraMultiply();
 		long diff2 = System.currentTimeMillis() - start2;
-		printResult();
 		System.out.println("Parallel with " + cores + " cores: " + diff2 + " milliseconds");
 		System.out.println("Speedup with " + cores + " cores: " + diff1 / (double) diff2);
 		service.shutdown();
